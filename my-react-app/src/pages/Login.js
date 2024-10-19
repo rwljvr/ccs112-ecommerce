@@ -1,29 +1,25 @@
-// src/pages/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import './Login.css';  // Import the CSS file
-import 'bootstrap/dist/css/bootstrap.min.css';
+import './Login.css';  // Same palette as before
 
-function Login() {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  // Predefined user credentials
   const adminEmail = 'admin';
   const adminPassword = 'password';
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Check if the entered credentials match the predefined ones
     if (email === adminEmail && password === adminPassword) {
-      setError(false); // Clear any previous errors
-      navigate('/dashboard'); // Redirect to the Dashboard page
+      setError(false);
+      navigate('/dashboard');  // Redirect to Dashboard on successful login
     } else {
-      setError(true); // Show error alert
+      setError(true);
     }
   };
 
@@ -76,6 +72,6 @@ function Login() {
       </Row>
     </Container>
   );
-}
+};
 
 export default Login;
