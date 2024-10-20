@@ -1,0 +1,26 @@
+/* src/pages/LoginSignup.css */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .auth-form .form-control {
+    border-radius: 10px;
+    border: 1px solid #bdc3c7;
+    padding: 15px;
+  }
+  
+  .auth-btn {
+    background-color: #32CD32; /* Lime Green */
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-weight: bold;
+    width: 100%;
+  }
+  
+  .auth-btn:hover {
+    background-color: #28a745;
+  }
+  

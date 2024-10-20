@@ -1,0 +1,46 @@
+/* src/pages/AuthTabs.css */
+.auth-container {
+  min-height: 100vh;
+  background-color: #2C3E50; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.auth-tab {
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #fff;
+}
+
+.auth-tab.active {
+  border-bottom: 2px solid #fff;
+}
+
+.auth-tab {
+  color: #bdc3c7;
+}
+
+.auth-tab.active {
+  color: #fff; 
+}
+
+.tab-divider {
+  border: 0.5px solid #fff; 
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.auth-card {
+  border-radius: 15px;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+}
