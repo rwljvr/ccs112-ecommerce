@@ -1,33 +1,38 @@
 /* src/pages/Dashboard.css */
 
-/* Apply general container styles */
-.add-product-container {
-    background-color: #f4f6ff;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #10375c;
-  }
-  
-  /* Form Label Styling */
-  .form-label {
-    color: #10375c;
-    font-weight: bold;
-  }
-  
-  /* Button styling */
-  .btn-custom {
-    background-color: #f3c623;
-    border-color: #f3c623;
-    color: white;
-  }
-  
-  .btn-custom:hover {
-    background-color: #eb8317;
-    border-color: #eb8317;
-  }
-  
-  h2 {
-    color: #10375c;
-    font-weight: bold;
-  }
-  
+/* General container styling */
+.dashboard-container {
+  background-color: #f4f6ff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Card styling */
+.card {
+  border: 1px solid #10375c;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Label Styling */
+.form-label {
+  color: #10375c;
+  font-weight: bold;
+}
+
+/* Button styling */
+.btn-custom {
+  background-color: #f3c623;
+  border-color: #f3c623;
+  color: white;
+}
+
+.btn-custom:hover {
+  background-color: #eb8317;
+  border-color: #eb8317;
+}
+
+h2 {
+  color: #10375c;
+  font-weight: bold;
+}

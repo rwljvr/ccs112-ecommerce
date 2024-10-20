@@ -1,3 +1,7 @@
+body{
+  background-color: #81838b;
+}
+
 .App {
   text-align: center;
 }
@@ -35,4 +39,77 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* src/pages/Login.css */
+.container {
+  min-height: 100vh;
+  background-color: #81838b; /* Primary background color */
+}
+
+.card {
+  border-color: #10375C;
+}
+
+.card-title {
+  color: #10375C; /* Dark text color */
+}
+
+.form-label {
+  color: #10375C; /* Label text color */
+}
+
+.btn-custom {
+  background-color: #F3C623; /* Secondary button color */
+  border-color: #F3C623;
+}
+
+.btn-custom:hover {
+  background-color: #EB8317; /* Button hover state */
+  border-color: #EB8317;
+}
+
+.alert-custom {
+  background-color: #EB8317;
+  color: #fff;
+  border-color: #EB8317;
+}
+
+/* src/pages/Dashboard.css */
+
+/* General container styling */
+.dashboard-container {
+  background-color: #81838b;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Card styling */
+.card {
+  border: 1px solid #10375c;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Label Styling */
+.form-label {
+  color: #34699b;
+  font-weight: bold;
+}
+
+/* Button styling */
+.btn-custom {
+  background-color: #3874b8;
+  border-color: #ffffff;
+  color: white;
+}
+
+.btn-custom:hover {
+  background-color: #bd2121;
+  border-color: #746c64;
+}
+
+h2 {
+  color: #10375c;
+  font-weight: bold;
 }

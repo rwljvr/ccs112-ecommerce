@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button, Row, Col } from 'react-bootstrap';
-import './Dashboard.css'; // Same palette from login
+import './Dashboard.css'; // Import the CSS file for Dashboard styles
 
 const AddProduct = ({ onAddProduct }) => {
   const [barcode, setBarcode] = useState('');
