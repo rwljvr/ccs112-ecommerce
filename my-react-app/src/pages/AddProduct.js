@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import React, { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';  // Make sure Bootstrap is imported
 
-const AddProduct = ({ onAddProduct, currentProduct }) => {
+const AddProduct = ({ onAddProduct }) => {
   const [barcode, setBarcode] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
 
-  // When currentProduct changes (edit mode), set the form fields
-  useEffect(() => {
-    if (currentProduct) {
-      setBarcode(currentProduct.barcode);
-      setDescription(currentProduct.description);
-      setPrice(currentProduct.price);
-      setQuantity(currentProduct.quantity);
-    }
-  }, [currentProduct]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newProduct = { barcode, description, price, quantity };
+
+    // Ensure price and quantity are numbers
+    const parsedPrice = parseFloat(price);
+    const parsedQuantity = parseInt(quantity, 10);
+
+    // Check for valid inputs
+    if (isNaN(parsedPrice) || isNaN(parsedQuantity) || parsedPrice <= 0 || parsedQuantity < 0) {
+      alert('Please enter valid values for price and quantity.');
+      return;
+    }
+
+    const newProduct = { barcode, description, price: parsedPrice, quantity: parsedQuantity };
     onAddProduct(newProduct);
 
     // Clear form fields after submission
@@ -30,54 +31,62 @@ const AddProduct = ({ onAddProduct, currentProduct }) => {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      <Form.Group className="mb-3">
-        <Form.Label>Item Barcode</Form.Label>
-        <Form.Control
-          type="text"
-          value={barcode}
-          onChange={(e) => setBarcode(e.target.value)}
-          required
-        />
-      </Form.Group>
+    <div>
+      <form onSubmit={handleSubmit} className="p-4 border rounded shadow-sm bg-light">
+        <div className="mb-3">
+          <label htmlFor="barcode" className="form-label">Item Barcode:</label>
+          <input
+            type="text"
+            className="form-control"
+            id="barcode"
+            value={barcode}
+            onChange={(e) => setBarcode(e.target.value)}
+            required
+          />
+        </div>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Product Description</Form.Label>
-        <Form.Control
-          as="textarea"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-      </Form.Group>
+        <div className="mb-3">
+          <label htmlFor="description" className="form-label">Product Description:</label>
+          <textarea
+            className="form-control"
+            id="description"
+            rows="3"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          ></textarea>
+        </div>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Price</Form.Label>
-        <Form.Control
-          type="number"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          required
-          min="0"
-          step="0.01"
-        />
-      </Form.Group>
+        <div className="mb-3">
+          <label htmlFor="price" className="form-label">Price:</label>
+          <input
+            type="number"
+            className="form-control"
+            id="price"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+            min="0.01" // Ensure price is positive
+            step="0.01"
+          />
+        </div>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Available Quantity</Form.Label>
-        <Form.Control
-          type="number"
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          required
-          min="0"
-        />
-      </Form.Group>
+        <div className="mb-3">
+          <label htmlFor="quantity" className="form-label">Available Quantity:</label>
+          <input
+            type="number"
+            className="form-control"
+            id="quantity"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            required
+            min="0"
+          />
+        </div>
 
-      <Button variant="primary" type="submit">
-        {currentProduct ? 'Update Product' : 'Add Product'}
-      </Button>
-    </Form>
+        <button type="submit" className="btn btn-success w-100">Add Product</button>
+      </form>
+    </div>
   );
 };
 

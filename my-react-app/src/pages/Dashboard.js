@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import api from './api'; // Import Axios instance
 import AddProduct from './AddProduct';
 import ProductTable from './ProductTable';
 
@@ -10,7 +11,17 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
   const navigate = useNavigate();
 
-  // Open the modal and set the currentProductIndex if editing
+  useEffect(() => {
+    // Fetch products from the Laravel API on component mount
+    api.get('/products')
+      .then(response => {
+        setProducts(response.data);
+      })
+      .catch(error => {
+        console.error('There was an error fetching products!', error);
+      });
+  }, []);
+
   const handleOpenModal = (index = null) => {
     setCurrentProductIndex(index);
     setShowModal(true); // Show modal
@@ -24,25 +35,38 @@ const Dashboard = () => {
   const handleAddProduct = (newProduct) => {
     if (currentProductIndex !== null) {
       // Update existing product
-      const updatedProducts = products.map((product, index) =>
-        index === currentProductIndex ? newProduct : product
-      );
-      setProducts(updatedProducts);
+      api.put(`/products/${products[currentProductIndex].id}`, newProduct)
+        .then(response => {
+          const updatedProducts = products.map((product, index) =>
+            index === currentProductIndex ? response.data : product
+          );
+          setProducts(updatedProducts);
+        })
+        .catch(error => {
+          console.error('There was an error updating the product!', error);
+        });
     } else {
       // Add new product
-      setProducts([...products, newProduct]);
+      api.post('/products', newProduct)
+        .then(response => {
+          setProducts([...products, response.data]);
+        })
+        .catch(error => {
+          console.error('There was an error adding the product!', error);
+        });
     }
-    // Close modal after submission
-    handleCloseModal();
+    handleCloseModal(); // Close the modal
   };
 
-  const handleEditProduct = (index) => {
-    handleOpenModal(index); // Open modal for editing the selected product
-  };
-
-  const handleDeleteProduct = (index) => {
-    const updatedProducts = products.filter((_, i) => i !== index);
-    setProducts(updatedProducts);
+  const handleDeleteProduct = (id) => {
+    api.delete(`/products/${id}`)
+      .then(() => {
+        const updatedProducts = products.filter(product => product.id !== id);
+        setProducts(updatedProducts);
+      })
+      .catch(error => {
+        console.error('There was an error deleting the product!', error);
+      });
   };
 
   const handleLogout = () => {
@@ -64,7 +88,6 @@ const Dashboard = () => {
 
         <Col xs={12} className="mb-4">
           <Card className="p-3">
-            {/* Wrapping the button in a div to control its width */}
             <div className="d-flex justify-content-start mb-3">
               <Button variant="primary" onClick={() => handleOpenModal()}>
                 Add Product
@@ -72,23 +95,25 @@ const Dashboard = () => {
             </div>
             <ProductTable
               products={products}
-              onEditProduct={handleEditProduct}
+              onEditProduct={handleOpenModal}
               onDeleteProduct={handleDeleteProduct}
             />
           </Card>
         </Col>
-
       </Row>
 
       {/* Add/Edit Product Modal */}
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>{currentProductIndex !== null ? 'Edit Product' : 'Add Product'}</Modal.Title>
+          <Modal.Title className="w-100 text-center">
+            {currentProductIndex !== null ? 'Edit Product' : 'Add Product'}
+          </Modal.Title>
         </Modal.Header>
+
         <Modal.Body>
           <AddProduct
             onAddProduct={handleAddProduct}
-            currentProduct={products[currentProductIndex]} // Pass current product for editing
+            currentProduct={currentProductIndex !== null ? products[currentProductIndex] : null}
           />
         </Modal.Body>
       </Modal>
