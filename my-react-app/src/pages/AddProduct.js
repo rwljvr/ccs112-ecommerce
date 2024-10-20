@@ -1,20 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Row, Col } from 'react-bootstrap';
-import './Dashboard.css'; // Same palette from login
 
-const AddProduct = ({ onAddProduct }) => {
+
+const AddProduct = ({ onAddProduct, currentProduct }) => {
   const [barcode, setBarcode] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
   const [category, setCategory] = useState('');
 
+  // Load current product data into the form when editing
+  useEffect(() => {
+    if (currentProduct) {
+      setBarcode(currentProduct.barcode);
+      setDescription(currentProduct.description);
+      setPrice(currentProduct.price);
+      setQuantity(currentProduct.quantity);
+      setCategory(currentProduct.category);
+    } else {
+      // Reset form when not editing
+      setBarcode('');
+      setDescription('');
+      setPrice('');
+      setQuantity('');
+      setCategory('');
+    }
+  }, [currentProduct]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const newProduct = { barcode, description, price, quantity, category };
+
     onAddProduct(newProduct);
 
-    // Reset the form fields
+    // Clear the form after submission
     setBarcode('');
     setDescription('');
     setPrice('');
@@ -24,7 +44,7 @@ const AddProduct = ({ onAddProduct }) => {
 
   return (
     <div className="add-product-container">
-      <h2 className="mb-4">Add New Product</h2>
+      <h2 className="mb-4">{currentProduct ? 'Edit Product' : 'Add New Product'}</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group as={Row} className="mb-3">
           <Form.Label column sm={3} className="form-label">
@@ -110,9 +130,20 @@ const AddProduct = ({ onAddProduct }) => {
 
         <div className="d-flex justify-content-end">
           <Button variant="primary" type="submit" className="me-2 btn-custom">
-            Add Product
+            {currentProduct ? 'Update Product' : 'Add Product'}
           </Button>
-          <Button variant="secondary" className="btn-custom">
+          <Button
+            variant="secondary"
+            className="btn-custom"
+            onClick={() => {
+              // Reset form if canceling
+              setBarcode('');
+              setDescription('');
+              setPrice('');
+              setQuantity('');
+              setCategory('');
+            }}
+          >
             Cancel
           </Button>
         </div>
