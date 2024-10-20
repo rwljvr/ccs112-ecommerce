@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import { Table, Button, Alert, Form, Row, Col } from 'react-bootstrap';
 
@@ -81,17 +82,56 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }) => {
                   variant="warning"
                   onClick={() => onEditProduct(products.indexOf(searchResult))}
                   className="me-2"
+=======
+import React from 'react';
+import { Table, Button } from 'react-bootstrap';
+
+const ProductTable = ({ products = [], onEditProduct, onDeleteProduct }) => {
+  return (
+    <Table striped bordered hover responsive>
+      <thead>
+        <tr>
+          <th>Barcode</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Category</th>
+          <th>Actions</th> {/* Added column for Edit/Delete actions */}
+        </tr>
+      </thead>
+      <tbody>
+        {products.length > 0 ? (
+          products.map((product, index) => (
+            <tr key={index}>
+              <td>{product.barcode}</td>
+              <td>{product.description}</td>
+              <td>{product.price}</td>
+              <td>{product.quantity}</td>
+              <td>{product.category}</td>
+              <td>
+                <Button
+                  variant="warning"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => onEditProduct(index)}
+>>>>>>> 2c329f66792233e86de7d138a051a6465d810b3d
                 >
                   Edit
                 </Button>
                 <Button
                   variant="danger"
+<<<<<<< HEAD
                   onClick={() => onDeleteProduct(products.indexOf(searchResult))}
+=======
+                  size="sm"
+                  onClick={() => onDeleteProduct(index)}
+>>>>>>> 2c329f66792233e86de7d138a051a6465d810b3d
                 >
                   Delete
                 </Button>
               </td>
             </tr>
+<<<<<<< HEAD
           ) : (
             products.map((product, index) => (
               <tr key={index}>
@@ -120,6 +160,18 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }) => {
         </tbody>
       </Table>
     </div>
+=======
+          ))
+        ) : (
+          <tr>
+            <td colSpan="6" className="text-center">
+              No products available
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </Table>
+>>>>>>> 2c329f66792233e86de7d138a051a6465d810b3d
   );
 };
 
