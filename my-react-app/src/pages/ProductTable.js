@@ -1,39 +1,46 @@
-
-// ProductTable.js
 import React, { useState, useEffect } from 'react';
-import { Table, Button, FormControl, Modal, Form } from 'react-bootstrap';
+import { Table, Button, FormControl, Modal, Form, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import AddProduct from './AddProduct';
 
 const ProductTable = () => {
   const [products, setProducts] = useState([]);
+  const [originalProducts, setOriginalProducts] = useState([]);
   const [searchBarcode, setSearchBarcode] = useState('');
   const [editModal, setEditModal] = useState(false);
+  const [addModal, setAddModal] = useState(false);
   const [editProduct, setEditProduct] = useState({});
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = async () => {
+    setLoading(true);
     try {
       const response = await axios.get('http://localhost:8000/api/products');
       setProducts(response.data);
+      setOriginalProducts(response.data);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      setError('Error fetching products: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddProduct = () => {
-    fetchProducts();
-  };
-
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(`http://localhost:8000/api/products/${id}`);
-      setProducts(products.filter((product) => product.id !== id));
-    } catch (error) {
-      alert('Failed to delete product: ' + error.message);
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      setLoading(true);
+      try {
+        await axios.delete(`http://localhost:8000/api/products/${id}`);
+        setProducts(products.filter((product) => product.id !== id));
+      } catch (error) {
+        setError('Failed to delete product: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -48,75 +55,113 @@ const ProductTable = () => {
   };
 
   const handleEditSubmit = async () => {
+    setLoading(true);
     try {
       await axios.put(`http://localhost:8000/api/products/${editProduct.id}`, editProduct);
       setEditModal(false);
       fetchProducts();
       alert('Product updated successfully!');
     } catch (error) {
-      alert('Failed to update product: ' + error.message);
+      setError('Failed to update product: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSearch = () => {
-    const product = products.find((p) => p.barcode === searchBarcode);
-    if (!product) {
-      alert('Product not found!');
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchBarcode(value);
+
+    if (value === '') {
+      setProducts(originalProducts);
     } else {
-      setProducts([product]);
+      const filteredProducts = originalProducts.filter((p) => p.barcode === value);
+      setProducts(filteredProducts);
     }
+  };
+
+  const handleClearSearch = () => {
+    setSearchBarcode('');
+    setProducts(originalProducts);
   };
 
   return (
     <div className="table-container">
       <h3 className="text-center mb-4">Product List</h3>
+      {error && <Alert variant="danger">{error}</Alert>}
 
-      <div className="mb-3">
-        <FormControl
-          type="text"
-          placeholder="Search by barcode"
-          value={searchBarcode}
-          onChange={(e) => setSearchBarcode(e.target.value)}
-        />
-        <Button variant="primary" className="mt-2" onClick={handleSearch}>
-          Search
+      <div className="mb-3 d-flex justify-content-between">
+        <Button variant="primary" onClick={() => setAddModal(true)}>
+          Add Product
         </Button>
+        <div className="d-flex">
+          <Button variant="secondary" className="me-2" onClick={handleClearSearch}>
+            Clear Search
+          </Button>
+          <FormControl
+            type="text"
+            placeholder="Search by barcode"
+            value={searchBarcode}
+            onChange={handleSearchChange}
+            style={{ width: '30vw' }}
+          />
+        </div>
       </div>
 
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>Barcode</th>
-            <th>Description</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.id}>
-              <td>{product.barcode}</td>
-              <td>{product.description}</td>
-              <td>₱{product.price}</td>
-              <td>{product.quantity}</td>
-              <td>
-                <Button variant="secondary" onClick={() => handleEditClick(product)}>
-                  Edit
-                </Button>{' '}
-                <Button variant="danger" onClick={() => handleDelete(product.id)}>
-                  Delete
-                </Button>
-              </td>
+      {loading ? (
+        <div className="text-center">
+          <Spinner animation="border" />
+        </div>
+      ) : (
+        <Table striped bordered hover responsive>
+          <thead>
+            <tr>
+              <th>Barcode</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr key={product.id}>
+                <td>{product.barcode}</td>
+                <td>{product.description}</td>
+                <td>₱{product.price}</td>
+                <td>{product.quantity}</td>
+                <td className="text-center">
+                  <div className="d-flex justify-content-center">
+                    <Button variant="warning" onClick={() => handleEditClick(product)} className="me-2">
+                      Edit
+                    </Button>
+                    <Button variant="danger" onClick={() => handleDelete(product.id)}>
+                      Delete
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+
+      {/* Add Product Modal */}
+      <Modal show={addModal} onHide={() => setAddModal(false)}>
+        <Modal.Header>
+          <Modal.Title>Add Product</Modal.Title>
+          <Button variant="close" onClick={() => setAddModal(false)} aria-label="Close" />
+        </Modal.Header>
+        <Modal.Body>
+          <AddProduct fetchProducts={fetchProducts} onClose={() => setAddModal(false)} /> {/* Ensure this line is correct */}
+        </Modal.Body>
+      </Modal>
 
       {/* Edit Product Modal */}
       <Modal show={editModal} onHide={() => setEditModal(false)}>
-        <Modal.Header closeButton>
+        <Modal.Header>
           <Modal.Title>Edit Product</Modal.Title>
+          <Button variant="close" onClick={() => setEditModal(false)} aria-label="Close" />
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -129,7 +174,6 @@ const ProductTable = () => {
                 onChange={handleEditChange}
               />
             </Form.Group>
-
             <Form.Group>
               <Form.Label>Description</Form.Label>
               <Form.Control
@@ -139,7 +183,6 @@ const ProductTable = () => {
                 onChange={handleEditChange}
               />
             </Form.Group>
-
             <Form.Group>
               <Form.Label>Price</Form.Label>
               <Form.Control
@@ -149,7 +192,6 @@ const ProductTable = () => {
                 onChange={handleEditChange}
               />
             </Form.Group>
-
             <Form.Group>
               <Form.Label>Quantity</Form.Label>
               <Form.Control
@@ -162,14 +204,12 @@ const ProductTable = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setEditModal(false)}>
-            Cancel
-          </Button>
           <Button variant="primary" onClick={handleEditSubmit}>
             Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
+
     </div>
   );
 };

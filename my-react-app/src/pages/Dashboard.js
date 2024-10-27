@@ -1,3 +1,4 @@
+// Dashboard.js
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
@@ -12,7 +13,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch products from the Laravel API on component mount
+    // Fetch products from the API on component mount
     api.get('/products')
       .then(response => {
         setProducts(response.data);
@@ -30,32 +31,6 @@ const Dashboard = () => {
   const handleCloseModal = () => {
     setShowModal(false); // Hide modal
     setCurrentProductIndex(null); // Reset current product index
-  };
-
-  const handleAddProduct = (newProduct) => {
-    if (currentProductIndex !== null) {
-      // Update existing product
-      api.put(`/products/${products[currentProductIndex].id}`, newProduct)
-        .then(response => {
-          const updatedProducts = products.map((product, index) =>
-            index === currentProductIndex ? response.data : product
-          );
-          setProducts(updatedProducts);
-        })
-        .catch(error => {
-          console.error('There was an error updating the product!', error);
-        });
-    } else {
-      // Add new product
-      api.post('/products', newProduct)
-        .then(response => {
-          setProducts([...products, response.data]);
-        })
-        .catch(error => {
-          console.error('There was an error adding the product!', error);
-        });
-    }
-    handleCloseModal(); // Close the modal
   };
 
   const handleDeleteProduct = (id) => {
@@ -76,7 +51,6 @@ const Dashboard = () => {
       navigate('/'); // Navigate to login page
     }
   };
-  
 
   return (
     <Container className="dashboard-container mt-4">
@@ -90,11 +64,6 @@ const Dashboard = () => {
 
         <Col xs={12} className="mb-4">
           <Card className="p-3">
-            <div className="d-flex justify-content-start mb-3">
-              <Button variant="primary" onClick={() => handleOpenModal()}>
-                Add Product
-              </Button>
-            </div>
             <ProductTable
               products={products}
               onEditProduct={handleOpenModal}
@@ -103,23 +72,6 @@ const Dashboard = () => {
           </Card>
         </Col>
       </Row>
-
-      {/* Add/Edit Product Modal */}
-<Modal show={showModal} onHide={handleCloseModal} centered>
-  <Modal.Header closeButton>
-    <Modal.Title className="w-100 text-center">
-      {currentProductIndex !== null ? 'Edit Product' : 'Add Product'}
-    </Modal.Title>
-  </Modal.Header>
-
-  <Modal.Body className="p-0"> {/* Add this class to remove padding */}
-    <AddProduct
-      onAddProduct={handleAddProduct}
-      currentProduct={currentProductIndex !== null ? products[currentProductIndex] : null}
-    />
-  </Modal.Body>
-</Modal>
-
     </Container>
   );
 };
