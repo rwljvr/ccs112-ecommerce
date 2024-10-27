@@ -1,3 +1,4 @@
+
 // ProductTable.js
 import React, { useState, useEffect } from 'react';
 import { Table, Button, FormControl, Modal, Form } from 'react-bootstrap';
@@ -65,6 +66,10 @@ const ProductTable = () => {
       setProducts([product]);
     }
   };
+
+  useEffect(() => {
+    setShowAlert(false); // Close alert whenever the search query changes
+  }, [searchQuery]);
 
   return (
     <div className="table-container">
