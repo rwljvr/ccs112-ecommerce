@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 
@@ -11,12 +11,20 @@ const Login = () => {
   const adminEmail = 'admin';
   const adminPassword = 'password';
 
+  useEffect(() => {
+    // Redirect to dashboard if already logged in
+    if (localStorage.getItem('isAuthenticated') === 'true') {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (email === adminEmail && password === adminPassword) {
       setError(false);
-      navigate('/dashboard');  // Redirect to Dashboard on successful login
+      localStorage.setItem('isAuthenticated', 'true');
+      navigate('/dashboard');
     } else {
       setError(true);
     }

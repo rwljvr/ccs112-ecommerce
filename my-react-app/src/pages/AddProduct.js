@@ -40,28 +40,31 @@ const AddProduct = ({ onAddProduct }) => {
   };
 
   return (
-    <div className="add-product-container">
-      <h4 className="add-product-title">Add Product</h4>
-      
-      <form onSubmit={handleSubmit}>
-        <label className="add-product-label">Item Barcode:</label>
+    <div className="add-product-container bg-white p-0 rounded border-0" style={{ boxShadow: 'none' }}>
+    <form onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label className="form-label">Item Barcode:</label>
         <input
           type="text"
           value={barcode}
           onChange={(e) => setBarcode(e.target.value)}
           required
-          className="add-product-input"
+          className="form-control"
         />
-        
-        <label className="add-product-label">Product Description:</label>
+      </div>
+  
+      <div className="form-group">
+        <label className="form-label">Product Description:</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           required
-          className="add-product-input"
+          className="form-control"
         />
-        
-        <label className="add-product-label">Price:</label>
+      </div>
+  
+      <div className="form-group">
+        <label className="form-label">Price:</label>
         <input
           type="number"
           value={price}
@@ -69,24 +72,31 @@ const AddProduct = ({ onAddProduct }) => {
           required
           min="0"
           step="0.01"
-          className="add-product-input"
+          className="form-control"
         />
-        
-        <label className="add-product-label">Available Quantity:</label>
+      </div>
+  
+      <div className="form-group">
+        <label className="form-label">Available Quantity:</label>
         <input
           type="number"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
           required
           min="0"
-          className="add-product-input"
+          className="form-control"
         />
-        
-        <button type="submit" className="add-product-button">
-          Add Product
-        </button>
-      </form>
-    </div>
+      </div>
+  
+      <button type="submit" className="btn btn-primary w-100 mt-3">
+        Add Product
+      </button>
+    </form>
+  </div>
+
+
+  
+
   );
 };
 

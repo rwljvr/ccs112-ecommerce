@@ -72,9 +72,11 @@ const Dashboard = () => {
   const handleLogout = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
     if (confirmLogout) {
+      localStorage.removeItem('isAuthenticated'); // Clear login status
       navigate('/'); // Navigate to login page
     }
   };
+  
 
   return (
     <Container className="dashboard-container mt-4">
@@ -103,20 +105,21 @@ const Dashboard = () => {
       </Row>
 
       {/* Add/Edit Product Modal */}
-      <Modal show={showModal} onHide={handleCloseModal} centered>
-        <Modal.Header closeButton>
-          <Modal.Title className="w-100 text-center">
-            {currentProductIndex !== null ? 'Edit Product' : 'Add Product'}
-          </Modal.Title>
-        </Modal.Header>
+<Modal show={showModal} onHide={handleCloseModal} centered>
+  <Modal.Header closeButton>
+    <Modal.Title className="w-100 text-center">
+      {currentProductIndex !== null ? 'Edit Product' : 'Add Product'}
+    </Modal.Title>
+  </Modal.Header>
 
-        <Modal.Body>
-          <AddProduct
-            onAddProduct={handleAddProduct}
-            currentProduct={currentProductIndex !== null ? products[currentProductIndex] : null}
-          />
-        </Modal.Body>
-      </Modal>
+  <Modal.Body className="p-0"> {/* Add this class to remove padding */}
+    <AddProduct
+      onAddProduct={handleAddProduct}
+      currentProduct={currentProductIndex !== null ? products[currentProductIndex] : null}
+    />
+  </Modal.Body>
+</Modal>
+
     </Container>
   );
 };

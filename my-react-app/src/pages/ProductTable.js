@@ -67,10 +67,6 @@ const ProductTable = () => {
     }
   };
 
-  useEffect(() => {
-    setShowAlert(false); // Close alert whenever the search query changes
-  }, [searchQuery]);
-
   return (
     <div className="table-container">
       <h3 className="text-center mb-4">Product List</h3>
@@ -116,8 +112,6 @@ const ProductTable = () => {
           ))}
         </tbody>
       </Table>
-
-      <AddProduct onAddProduct={handleAddProduct} />
 
       {/* Edit Product Modal */}
       <Modal show={editModal} onHide={() => setEditModal(false)}>
