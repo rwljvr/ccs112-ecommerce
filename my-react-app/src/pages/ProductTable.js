@@ -1,66 +1,64 @@
-import React, { useState } from 'react';
-import { Table, Button, Alert, Form, Row, Col } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Table, Button, FormControl } from 'react-bootstrap';
+import axios from 'axios';
+import AddProduct from './AddProduct'; // Import AddProduct component
 
+const ProductTable = () => {
+  const [products, setProducts] = useState([]);
+  const [searchBarcode, setSearchBarcode] = useState('');
 
-const ProductTable = ({ products, onEditProduct, onDeleteProduct }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResult, setSearchResult] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-
-    const foundProduct = products.find(
-      (product) => product.barcode === searchQuery
-    );
-
-    if (foundProduct) {
-      setSearchResult(foundProduct);
-      setShowAlert(false);
-    } else {
-      setSearchResult(null);
-      setShowAlert(true);
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/products');
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
     }
   };
 
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    setSearchResult(null);
-    setShowAlert(false);
+  const handleAddProduct = (newProduct) => {
+    setProducts([...products, newProduct]);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/products/${id}`);
+      setProducts(products.filter(product => product.id !== id));
+    } catch (error) {
+      alert('Failed to delete product: ' + error.message);
+    }
+  };
+
+  const handleSearch = () => {
+    const product = products.find(p => p.barcode === searchBarcode);
+    if (!product) {
+      alert('Product not found!');
+    } else {
+      setProducts([product]);
+    }
   };
 
   return (
-    <div>
-      <h2 className="mb-4">Product List</h2>
+    <div className="table-container">
+      <h3 className="text-center mb-4">Product List</h3>
 
-      <Form onSubmit={handleSearch} className="mb-3">
-        <Row>
-          <Col sm={9}>
-            <Form.Control
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by barcode"
-            />
-          </Col>
-          <Col sm={3}>
-            <Button type="submit" variant="primary" className="me-2">
-              Search
-            </Button>
-            <Button variant="secondary" onClick={handleClearSearch}>
-              Clear
-            </Button>
-          </Col>
-        </Row>
-      </Form>
+      <div className="mb-3">
+        <FormControl
+          type="text"
+          placeholder="Search by barcode"
+          value={searchBarcode}
+          onChange={(e) => setSearchBarcode(e.target.value)}
+        />
+        <Button variant="primary" className="mt-2" onClick={handleSearch}>
+          Search
+        </Button>
+      </div>
 
-      {showAlert && (
-        <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
-          Product with barcode "{searchQuery}" does not exist.
-        </Alert>
-      )}
-
-      <Table responsive striped bordered hover>
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
             <th>Barcode</th>
@@ -71,55 +69,24 @@ const ProductTable = ({ products, onEditProduct, onDeleteProduct }) => {
           </tr>
         </thead>
         <tbody>
-          {searchResult ? (
-            <tr>
-              <td>{searchResult.barcode}</td>
-              <td>{searchResult.description}</td>
-              <td>₱{searchResult.price}</td>
-              <td>{searchResult.quantity}</td>
+          {products.map((product) => (
+            <tr key={product.id}>
+              <td>{product.barcode}</td>
+              <td>{product.description}</td>
+              <td>₱{product.price}</td>
+              <td>{product.quantity}</td>
               <td>
-                <Button
-                  variant="warning"
-                  onClick={() => onEditProduct(products.indexOf(searchResult))}
-                  className="me-2"
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={() => onDeleteProduct(products.indexOf(searchResult))}
-                >
+                <Button variant="danger" onClick={() => handleDelete(product.id)}>
                   Delete
                 </Button>
               </td>
             </tr>
-          ) : (
-            products.map((product, index) => (
-              <tr key={index}>
-                <td>{product.barcode}</td>
-                <td>{product.description}</td>
-                <td>₱{product.price}</td>
-                <td>{product.quantity}</td>
-                <td>
-                  <Button
-                    variant="warning"
-                    onClick={() => onEditProduct(index)}
-                    className="me-2"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="danger"
-                    onClick={() => onDeleteProduct(index)}
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </Table>
+
+      {/* AddProduct component below to allow adding products directly */}
+      <AddProduct onAddProduct={handleAddProduct} />
     </div>
   );
 };

@@ -1,129 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Form, Button, Card, Container, Row, Col } from 'react-bootstrap';
+import axios from 'axios'; // Import Axios
 
-const AddProduct = ({ onAddProduct, currentProduct }) => {
+const AddProduct = ({ onAddProduct }) => {
   const [barcode, setBarcode] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
 
-  // Load current product data into the form when editing
-  useEffect(() => {
-    if (currentProduct) {
-      setBarcode(currentProduct.barcode);
-      setDescription(currentProduct.description);
-      setPrice(currentProduct.price);
-      setQuantity(currentProduct.quantity);
-    } else {
-      // Reset form when not editing
-      setBarcode('');
-      setDescription('');
-      setPrice('');
-      setQuantity('');
-    }
-  }, [currentProduct]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newProduct = { barcode, description, price, quantity };
 
-    onAddProduct(newProduct);
-
-    // Clear the form after submission
-    setBarcode('');
-    setDescription('');
-    setPrice('');
-    setQuantity('');
+    try {
+      const response = await axios.post('http://localhost:8000/api/products', newProduct);
+      if (response.status === 201 || response.status === 200) {
+        alert('Product added successfully!');
+        // Call the parent function to update the product table
+        onAddProduct(response.data); // Pass the new product to parent
+        // Reset form fields after submission
+        setBarcode('');
+        setDescription('');
+        setPrice('');
+        setQuantity('');
+      }
+    } catch (error) {
+      alert('Failed to add product: ' + error.message);
+    }
   };
 
   return (
-    <div className="add-product-container">
-      <h2 className="mb-4">{currentProduct ? 'Edit Product' : 'Add New Product'}</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm={3} className="form-label">
-            Barcode:
-          </Form.Label>
-          <Col sm={9}>
-            <Form.Control
-              type="text"
-              value={barcode}
-              onChange={(e) => setBarcode(e.target.value)}
-              required
-              placeholder="Enter barcode"
-            />
-          </Col>
-        </Form.Group>
+    <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+      <Row className="w-100">
+        <Col xs={12} sm={8} md={6} lg={4} className="mx-auto">
+          <Card className="shadow">
+            <Card.Body>
+              <Card.Title className="text-center mb-4">Add New Product</Card.Title>
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Item Barcode</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={barcode}
+                    onChange={(e) => setBarcode(e.target.value)}
+                    required
+                    placeholder="Enter barcode"
+                  />
+                </Form.Group>
 
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm={3} className="form-label">
-            Description:
-          </Form.Label>
-          <Col sm={9}>
-            <Form.Control
-              as="textarea"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-              placeholder="Enter product description"
-            />
-          </Col>
-        </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Product Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                    placeholder="Enter description"
+                  />
+                </Form.Group>
 
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm={3} className="form-label">
-            Price:
-          </Form.Label>
-          <Col sm={9}>
-            <Form.Control
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-              min="0"
-              step="0.01"
-              placeholder="Enter product price"
-            />
-          </Col>
-        </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Price</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter price"
+                  />
+                </Form.Group>
 
-        <Form.Group as={Row} className="mb-3">
-          <Form.Label column sm={3} className="form-label">
-            Quantity:
-          </Form.Label>
-          <Col sm={9}>
-            <Form.Control
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              required
-              min="0"
-              placeholder="Enter available quantity"
-            />
-          </Col>
-        </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label>Available Quantity</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    required
+                    min="0"
+                    placeholder="Enter quantity"
+                  />
+                </Form.Group>
 
-        <div className="d-flex justify-content-end">
-          <Button variant="primary" type="submit" className="me-2 btn-custom">
-            {currentProduct ? 'Update Product' : 'Add Product'}
-          </Button>
-          <Button
-            variant="secondary"
-            className="btn-custom"
-            onClick={() => {
-              // Reset form if canceling
-              setBarcode('');
-              setDescription('');
-              setPrice('');
-              setQuantity('');
-            }}
-          >
-            Cancel
-          </Button>
-        </div>
-      </Form>
-    </div>
+                <Button variant="primary" type="submit" className="w-100">
+                  Add Product
+                </Button>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 
