@@ -114,3 +114,45 @@ h2 {
   color: #10375c;
   font-weight: bold;
 }
+
+
+
+.add-product-container {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #F4F6FF;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-product-title {
+  color: #10375C;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.add-product-label {
+  color: #10375C;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.add-product-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.add-product-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #F3C623;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
