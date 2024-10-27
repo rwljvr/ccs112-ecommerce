@@ -1,11 +1,14 @@
+// ProductTable.js
 import React, { useState, useEffect } from 'react';
-import { Table, Button, FormControl } from 'react-bootstrap';
+import { Table, Button, FormControl, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
-import AddProduct from './AddProduct'; // Import AddProduct component
+import AddProduct from './AddProduct';
 
 const ProductTable = () => {
   const [products, setProducts] = useState([]);
   const [searchBarcode, setSearchBarcode] = useState('');
+  const [editModal, setEditModal] = useState(false);
+  const [editProduct, setEditProduct] = useState({});
 
   useEffect(() => {
     fetchProducts();
@@ -20,21 +23,42 @@ const ProductTable = () => {
     }
   };
 
-  const handleAddProduct = (newProduct) => {
-    setProducts([...products, newProduct]);
+  const handleAddProduct = () => {
+    fetchProducts();
   };
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:8000/api/products/${id}`);
-      setProducts(products.filter(product => product.id !== id));
+      setProducts(products.filter((product) => product.id !== id));
     } catch (error) {
       alert('Failed to delete product: ' + error.message);
     }
   };
 
+  const handleEditClick = (product) => {
+    setEditProduct(product);
+    setEditModal(true);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditProduct({ ...editProduct, [name]: value });
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      await axios.put(`http://localhost:8000/api/products/${editProduct.id}`, editProduct);
+      setEditModal(false);
+      fetchProducts();
+      alert('Product updated successfully!');
+    } catch (error) {
+      alert('Failed to update product: ' + error.message);
+    }
+  };
+
   const handleSearch = () => {
-    const product = products.find(p => p.barcode === searchBarcode);
+    const product = products.find((p) => p.barcode === searchBarcode);
     if (!product) {
       alert('Product not found!');
     } else {
@@ -76,6 +100,9 @@ const ProductTable = () => {
               <td>₱{product.price}</td>
               <td>{product.quantity}</td>
               <td>
+                <Button variant="secondary" onClick={() => handleEditClick(product)}>
+                  Edit
+                </Button>{' '}
                 <Button variant="danger" onClick={() => handleDelete(product.id)}>
                   Delete
                 </Button>
@@ -85,8 +112,65 @@ const ProductTable = () => {
         </tbody>
       </Table>
 
-      {/* AddProduct component below to allow adding products directly */}
       <AddProduct onAddProduct={handleAddProduct} />
+
+      {/* Edit Product Modal */}
+      <Modal show={editModal} onHide={() => setEditModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Product</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Barcode</Form.Label>
+              <Form.Control
+                type="text"
+                name="barcode"
+                value={editProduct.barcode || ''}
+                onChange={handleEditChange}
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                type="text"
+                name="description"
+                value={editProduct.description || ''}
+                onChange={handleEditChange}
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Price</Form.Label>
+              <Form.Control
+                type="number"
+                name="price"
+                value={editProduct.price || ''}
+                onChange={handleEditChange}
+              />
+            </Form.Group>
+
+            <Form.Group>
+              <Form.Label>Quantity</Form.Label>
+              <Form.Control
+                type="number"
+                name="quantity"
+                value={editProduct.quantity || ''}
+                onChange={handleEditChange}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setEditModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleEditSubmit}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
