@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, FormControl, Modal, Form, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
-import AddProduct from './AddProduct';
+import AddProduct from '../pages/AddProduct';
 
 const ProductTable = () => {
   const [products, setProducts] = useState([]);

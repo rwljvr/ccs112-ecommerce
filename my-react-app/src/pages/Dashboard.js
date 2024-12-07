@@ -3,17 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import api from './api'; // Import Axios instance
+import { Link } from 'react-router-dom'; // Import Link for navigation
 
-import ProductTable from './ProductTable';
+import ProductTable from '../components/ProductTable';
 
 const Dashboard = () => {
   const [products, setProducts] = useState([]);
   const [currentProductIndex, setCurrentProductIndex] = useState(null);
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
   const navigate = useNavigate();
+  const role = localStorage.getItem('role'); // Get role from local storage (e.g., admin, user)
 
   useEffect(() => {
-   
     api.get('/products')
       .then(response => {
         setProducts(response.data);
@@ -48,6 +49,8 @@ const Dashboard = () => {
     const confirmLogout = window.confirm('Are you sure you want to logout?');
     if (confirmLogout) {
       localStorage.removeItem('isAuthenticated'); // Clear login status
+      localStorage.removeItem('token');
+      localStorage.removeItem('role'); // Clear user role
       navigate('/'); // Navigate to login page
     }
   };
@@ -71,6 +74,17 @@ const Dashboard = () => {
             />
           </Card>
         </Col>
+
+        {/* Show Cart Button Only for Regular Users */}
+        {role !== 'admin' && (
+          <Col xs={12} className="text-center mb-4">
+            <Link to="/cart">
+              <Button variant="primary">
+                Go to Cart
+              </Button>
+            </Link>
+          </Col>
+        )}
       </Row>
     </Container>
   );

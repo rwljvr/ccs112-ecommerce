@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
+import axios from 'axios'; // Import axios
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [contact, setContact] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State for showing password
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -14,22 +16,32 @@ const Register = () => {
     e.preventDefault();
     setError(null);
 
+    // Validate contact number
+    if (!/^\d+$/.test(contact)) {
+      setError('Contact must only contain numbers.');
+      return;
+    }
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, contact }),
+      // Send registration data using Axios
+      const response = await axios.post('http://127.0.0.1:8000/api/register', {
+        name,
+        email,
+        password,
+        contact
       });
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.errors ? JSON.stringify(data.errors) : 'Registration failed');
+      // Check if the response is successful
+      if (response.status === 200) {
+        alert('Registration successful! Please log in.');
+        navigate('/'); // Navigate to the login page
+      } else {
+        // Handle failure case if needed
+        setError('Registration failed. Please try again.');
       }
-
-      alert('Registration successful! Please log in.');
-      navigate('/');
     } catch (err) {
-      setError(err.message);
+      // Handle any Axios errors here
+      setError(err.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -45,6 +57,7 @@ const Register = () => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your full name"
               required
             />
           </Form.Group>
@@ -54,16 +67,25 @@ const Register = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
               required
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Password</Form.Label>
             <Form.Control
-              type="password"
+              type={showPassword ? 'text' : 'password'} // Toggle password visibility
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
               required
+            />
+            <Form.Check
+              type="checkbox"
+              label="Show Password"
+              className="mt-2"
+              onChange={() => setShowPassword(!showPassword)} // Toggle visibility
+              checked={showPassword}
             />
           </Form.Group>
           <Form.Group className="mb-3">
@@ -72,6 +94,7 @@ const Register = () => {
               type="text"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
+              placeholder="Enter your contact number"
               required
             />
           </Form.Group>
