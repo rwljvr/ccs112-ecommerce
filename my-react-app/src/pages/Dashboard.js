@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import api from './api'; // Import Axios instance
-import AddProduct from './AddProduct';
+
 import ProductTable from './ProductTable';
 
 const Dashboard = () => {
@@ -13,7 +13,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch products from the API on component mount
+   
     api.get('/products')
       .then(response => {
         setProducts(response.data);

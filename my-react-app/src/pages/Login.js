@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 
 const Login = () => {
@@ -8,8 +8,8 @@ const Login = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
-  const adminEmail = 'admin';
-  const adminPassword = 'password';
+  const DEFAULT_ADMIN_EMAIL = 'admin';
+  const DEFAULT_ADMIN_PASSWORD = 'password';
 
   useEffect(() => {
     // Redirect to dashboard if already logged in
@@ -18,14 +18,41 @@ const Login = () => {
     }
   }, [navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(false);
 
-    if (email === adminEmail && password === adminPassword) {
-      setError(false);
+    // Check for default admin credentials
+    if (email === DEFAULT_ADMIN_EMAIL && password === DEFAULT_ADMIN_PASSWORD) {
       localStorage.setItem('isAuthenticated', 'true');
-      navigate('/dashboard');
-    } else {
+      localStorage.setItem('role', 'admin');
+      navigate('/dashboard'); 
+      return;
+    }
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Login failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', data.user.role);
+
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        navigate('/dashboard');
+      } else {
+        navigate('/cart');
+      }
+    } catch (err) {
       setError(true);
     }
   };
@@ -73,6 +100,12 @@ const Login = () => {
                   Login
                 </Button>
               </Form>
+              <div className="text-center mt-3">
+                <span className="small-text">Don't have an account?</span>{' '}
+                <Link to="/register" className="text-primary">
+                  Create Account
+                </Link>
+              </div>
             </Card.Body>
           </Card>
         </Col>

@@ -6,12 +6,15 @@ import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './ProtectedRoute';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-
+import Register from './pages/Register';
+import Cart from './pages/Cart';
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/cart" element={<Cart />} />
         <Route
           path="/dashboard"
           element={
