@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import axios from 'axios'; // Import axios
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,10 +14,16 @@ const Login = () => {
   const DEFAULT_ADMIN_EMAIL = 'admin';
   const DEFAULT_ADMIN_PASSWORD = 'password';
 
+  // Redirect to dashboard if already logged in
   useEffect(() => {
-    // Redirect to dashboard if already logged in
-    if (localStorage.getItem('isAuthenticated') === 'true') {
-      navigate('/dashboard');
+    const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+    const userRole = localStorage.getItem('role');
+    if (isAuthenticated && userRole) {
+      if (userRole === 'admin') {
+        navigate('/dashboard');
+      } else if (userRole === 'user') {
+        navigate('/cart');
+      }
     }
   }, [navigate]);
 
@@ -24,65 +31,44 @@ const Login = () => {
     e.preventDefault();
     setError(null); // Clear previous errors
     setLoading(true); // Set loading to true
-  
-    // Log the email and password being sent for debugging
-    console.log('Attempting to login with email:', email, 'and password:', password);
-    
-    // Check for default admin credentials
+
+    // Check for default admin credentials before making API call
     if (email === DEFAULT_ADMIN_EMAIL && password === DEFAULT_ADMIN_PASSWORD) {
+      localStorage.setItem('token', 'default-admin-token'); // Use a placeholder token or real token
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('role', 'admin');
+      
       console.log('Default admin login successful, redirecting to dashboard.');
       navigate('/dashboard');
       setLoading(false); // Stop loading
-      return;
+      return; // Skip the API call and proceed with admin login
     }
-  
+
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const response = await axios.post('http://127.0.0.1:8000/api/login', {
+        email,
+        password,
       });
-  
-      // Log the response status and response body for debugging
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
-  
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-  
-      // Store the token in localStorage
-      localStorage.setItem('token', data.token); // Save the token here
+
+      console.log('Response data:', response.data);
+
+      // Handle successful login
+      localStorage.setItem('token', response.data.token); // Save the token here
       localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('role', data.user.role);
-  
-      // Log the token after storing it in localStorage
-      console.log('Token stored in localStorage:', localStorage.getItem('token'));
-  
-      // Log the role of the user after login
-      console.log('Logged in user role:', data.user.role);
-  
-      // Log the token to the console every time a successful login happens
-      console.log('Logged in successfully, token:', data.token);
-  
-      if (data.user.role === 'admin') {
+      localStorage.setItem('role', response.data.user.role);
+
+      if (response.data.user.role === 'admin') {
         navigate('/dashboard');
-      } else if (data.user.role === 'user') {
+      } else if (response.data.user.role === 'user') {
         navigate('/cart');
       }
     } catch (err) {
-      setError(err.message);
-      console.error('Login error:', err.message); // Log the error message
+      setError(err.response ? err.response.data.message : 'Login failed');
+      console.error('Login error:', err.message);
     } finally {
       setLoading(false); // Stop loading after response
     }
   };
-  
-  
-  
 
   return (
     <Container className="d-flex align-items-center justify-content-center container">
@@ -93,7 +79,7 @@ const Login = () => {
               <Card.Title className="text-center mb-4 card-title">Login</Card.Title>
               {error && (
                 <Alert variant="danger" className="alert-custom">
-                  Incorrect email or password. Please try again.
+                  {error}
                 </Alert>
               )}
               <Form onSubmit={handleSubmit}>

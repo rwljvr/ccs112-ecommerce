@@ -68,4 +68,19 @@ class CartController extends Controller
 
         return response()->json(['message' => 'Product removed from cart']);
     }
+
+    // Clear the cart after checkout
+    public function clearCart(Request $request)
+    {
+        $cart = Cart::where('user_id', $request->user()->id)->first();
+
+        if (!$cart) {
+            return response()->json(['message' => 'Cart not found'], 404);
+        }
+
+        // Detach all products from the cart
+        $cart->products()->detach();
+
+        return response()->json(['message' => 'Cart cleared after checkout']);
+    }
 }

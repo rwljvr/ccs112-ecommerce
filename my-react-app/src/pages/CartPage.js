@@ -5,14 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 
 const CartPage = () => {
-  const { cart = [], addToCart, products } = useCart();  // Default to empty array if cart is undefined
+  const { cart = [], addToCart, products } = useCart();
   const [showProductModal, setShowProductModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [showCartModal, setShowCartModal] = useState(false); // State for showing cart modal
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false); // State for the logout modal
   const navigate = useNavigate();
 
-  // Show the product modal to add products to the cart
   const handleShowProductModal = (product) => {
     setSelectedProduct(product);
     setQuantity(1);
@@ -30,36 +30,39 @@ const CartPage = () => {
 
   const handleAddToCart = () => {
     if (selectedProduct) {
-      addToCart(selectedProduct.id, quantity); // Adding the product to the cart
-      setShowProductModal(false);  // Close the modal
+      addToCart(selectedProduct.id, quantity);
+      setShowProductModal(false);
     }
   };
 
-  // Cart modal visibility functions
   const handleShowCart = () => setShowCartModal(true);
   const handleCloseCart = () => setShowCartModal(false);
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm('Are you sure you want to logout?');
-    if (confirmLogout) {
-      localStorage.removeItem('isAuthenticated');
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
-      navigate('/'); // Navigate to login page
-    }
+    setShowLogoutModal(true); // Show confirmation modal for logout
+  };
+
+  const confirmLogout = () => {
+    localStorage.removeItem('isAuthenticated'); // Clear login status
+    localStorage.removeItem('token');
+    localStorage.removeItem('role'); // Clear user role
+    setShowLogoutModal(false); // Close modal
+    navigate('/'); // Navigate to login page
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutModal(false); // Close the modal without logging out
   };
 
   return (
     <Container>
-      <h3>Your Cart</h3>
-      {cart.length === 0 ? (
-        <p>Your cart is empty.</p>
-      ) : (
-        <Button variant="primary" onClick={handleShowCart}>
-          View Cart
-        </Button>
-      )}
-
+      <h3>Shop</h3>
+      <Button variant="primary" onClick={handleShowCart}>
+        View Cart
+      </Button>
+      <Button className="m-2" variant="danger" onClick={handleLogout}>
+        Logout
+      </Button>
       <h4>Available Products</h4>
       <Row>
         {products.map((product) => (
@@ -68,9 +71,7 @@ const CartPage = () => {
               <Card.Body>
                 <Card.Title>{product.description}</Card.Title>
                 <Card.Text>₱{product.price}</Card.Text>
-                <Button 
-                  variant="primary" 
-                  onClick={() => handleShowProductModal(product)} >
+                <Button variant="primary" onClick={() => handleShowProductModal(product)}>
                   Add to Cart
                 </Button>
               </Card.Body>
@@ -79,7 +80,6 @@ const CartPage = () => {
         ))}
       </Row>
 
-      {/* Product Detail Modal */}
       {selectedProduct && (
         <Modal show={showProductModal} onHide={handleCloseProductModal}>
           <Modal.Header closeButton>
@@ -90,29 +90,43 @@ const CartPage = () => {
             <p><strong>Available Stock:</strong> {selectedProduct.quantity}</p>
             <Form.Group controlId="quantity">
               <Form.Label>Quantity</Form.Label>
-              <Form.Control 
-                type="number" 
-                value={quantity} 
-                min="1" 
-                max={selectedProduct.quantity} 
+              <Form.Control
+                type="number"
+                value={quantity}
+                min="1"
+                max={selectedProduct.quantity}
                 onChange={handleQuantityChange}
               />
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseProductModal}>Close</Button>
-            <Button variant="primary" onClick={handleAddToCart}>Confirm</Button>
+            <Button variant="secondary" onClick={handleCloseProductModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleAddToCart}>
+              Confirm
+            </Button>
           </Modal.Footer>
         </Modal>
       )}
 
-      {/* Cart Modal */}
-      <CartModal show={showCartModal} onClose={handleCloseCart} cart={cart} />
+      <CartModal show={showCartModal} onClose={handleCloseCart} />
 
-      {/* Logout Button */}
-      <Button variant="danger" onClick={handleLogout} className="mt-4">
-        Logout
-      </Button>
+      {/* Logout Confirmation Modal */}
+      <Modal show={showLogoutModal} onHide={cancelLogout}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Logout</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to log out?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={cancelLogout}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmLogout}>
+            Logout
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

@@ -12,6 +12,8 @@ const ProductTable = () => {
   const [editProduct, setEditProduct] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false); // State to control delete confirmation modal
+  const [productToDelete, setProductToDelete] = useState(null); // Store the product to be deleted
 
   useEffect(() => {
     fetchProducts();
@@ -30,18 +32,29 @@ const ProductTable = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      setLoading(true);
-      try {
-        await axios.delete(`http://localhost:8000/api/products/${id}`);
-        setProducts(products.filter((product) => product.id !== id));
-      } catch (error) {
-        setError('Failed to delete product: ' + error.message);
-      } finally {
-        setLoading(false);
-      }
+  const handleDeleteClick = (product) => {
+    setProductToDelete(product); // Set the product to be deleted
+    setDeleteModal(true); // Show delete confirmation modal
+  };
+
+  const handleDelete = async () => {
+    if (!productToDelete) return;
+
+    setLoading(true);
+    try {
+      await axios.delete(`http://localhost:8000/api/products/${productToDelete.id}`);
+      setProducts(products.filter((product) => product.id !== productToDelete.id));
+      setDeleteModal(false); // Close modal after successful deletion
+    } catch (error) {
+      setError('Failed to delete product: ' + error.message);
+      setDeleteModal(false); // Close modal even in case of error
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModal(false); // Close modal without deletion
   };
 
   const handleEditClick = (product) => {
@@ -135,7 +148,7 @@ const ProductTable = () => {
                     <Button variant="warning" onClick={() => handleEditClick(product)} className="me-2">
                       Edit
                     </Button>
-                    <Button variant="danger" onClick={() => handleDelete(product.id)}>
+                    <Button variant="danger" onClick={() => handleDeleteClick(product)}>
                       Delete
                     </Button>
                   </div>
@@ -210,6 +223,24 @@ const ProductTable = () => {
         </Modal.Footer>
       </Modal>
 
+      {/* Delete Confirmation Modal */}
+      <Modal show={deleteModal} onHide={handleCancelDelete}>
+        <Modal.Header>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+          <Button variant="close" onClick={handleCancelDelete} aria-label="Close" />
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this product? This action cannot be undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCancelDelete}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete}>
+            Yes, Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

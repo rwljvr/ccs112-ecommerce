@@ -59,16 +59,28 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
+        // Validate the incoming request to ensure valid data
         $request->validate([
             'barcode' => 'required|unique:products,barcode,' . $product->id,
             'description' => 'required',
             'price' => 'required|numeric',
-            'quantity' => 'required|integer',
+            'quantity' => 'required|integer', // Quantity to update or decrease
         ]);
 
+        // Check if we need to decrease the stock
+        if ($request->quantity < $product->quantity) {
+            // Subtract the quantity from the current stock
+            $product->quantity -= $request->quantity;
+        } else {
+            // If the quantity is not a decrease, simply update the product's quantity
+            $product->quantity = $request->quantity;
+        }
+
+        // Update other fields and save the product
         $product->update($request->all());
 
-        return $product;
+        // Return the updated product
+        return response()->json(['message' => 'Product stock updated successfully', 'product' => $product]);
     }
 
     /**

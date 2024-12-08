@@ -7,6 +7,12 @@ const ProtectedRoute = ({ children, role }) => {
 
   console.log("ProtectedRoute check: ", { isAuthenticated, userRole, requiredRole: role });
 
+  // If the user is already authenticated, redirect based on role
+  if (isAuthenticated && role && userRole !== role) {
+    console.log('User is authenticated but role does not match, redirecting to home.');
+    return <Navigate to="/" />; // Or to an appropriate route
+  }
+
   // Check if user is authenticated and has the correct role
   if (!isAuthenticated) {
     console.log('User is not authenticated, redirecting to login.');

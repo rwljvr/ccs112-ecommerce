@@ -12,48 +12,45 @@ export const CartProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch products from API endpoint
+  // Fetch all products (available products)
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/api/products');
+      setProducts(response.data); // Assuming response.data contains a list of products
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  };
+
+  // Fetch cart items
+  const fetchCart = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found. User is not authenticated.');
+      setCart([]); // Clear the cart if no token
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get('http://localhost:8000/api/cart', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCart(response.data.cart || []); // Set cart state
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch both products and cart when the provider mounts
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/products');
-        setProducts(response.data); // Assuming response.data is a list of products
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
     fetchProducts();
+    fetchCart();
   }, []);
 
-  // Fetch cart items for the logged-in user
-  useEffect(() => {
-    const fetchCart = async () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          console.log('No token found. User is not authenticated.');
-          return;
-        }
-      
-        try {
-          const response = await axios.get('http://localhost:8000/api/cart', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-      
-          // Log to inspect the response structure
-          console.log('Fetched Cart:', response.data);
-      
-          // Ensure the cart is an array before setting the state
-          setCart(response.data.cart || []);
-        } catch (error) {
-          console.error('Error fetching cart:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      
-    fetchCart();
-  }, []); // Fetch cart once after component mount
-
+  // Add product to cart
   const addToCart = async (productId, quantity) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -62,15 +59,16 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.post(
+      await axios.post(
         'http://localhost:8000/api/cart/add',
         { product_id: productId, quantity },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      console.log('Item added to cart:', response.data);
-      setCart(response.data.cart); // Assuming the API response returns the updated cart
+      console.log('Item added to cart. Fetching updated cart...');
+      await fetchCart(); // Re-fetch the cart to sync state with backend
+      await fetchProducts(); // Re-fetch the products to reflect any changes
     } catch (error) {
       console.error('Error adding to cart:', error.response?.data || error.message);
     }
@@ -85,18 +83,54 @@ export const CartProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:8000/api/cart/remove/${productId}`, {
+      await axios.delete(`http://localhost:8000/api/cart/remove/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Item removed from cart:', response.data);
-      setCart(response.data.cart); // Assuming the API response returns the updated cart
+      console.log('Item removed from cart. Fetching updated cart...');
+      await fetchCart(); // Re-fetch the cart to sync state with backend
     } catch (error) {
       console.error('Error removing from cart:', error);
     }
   };
 
+  const clearCart = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found. User is not authenticated.');
+      return;
+    }
+  
+    console.log('Clearing cart...'); // Log when cart is being cleared
+  
+    try {
+      // Use DELETE request instead of POST
+      await axios.delete(
+        'http://localhost:8000/api/cart/clear',
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setCart([]); // Reset the local cart state
+      console.log('Cart cleared in backend and locally');
+    } catch (error) {
+      console.error('Error clearing the cart:', error);
+    }
+  };
+  
+  
+  
+
   return (
-    <CartContext.Provider value={{ cart, products, addToCart, removeFromCart, loading }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        products,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        loading,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
